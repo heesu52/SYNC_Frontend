@@ -22,6 +22,8 @@
 *.pem
 cert/
 
+.env.development
+.env.production
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*

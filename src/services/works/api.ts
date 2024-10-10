@@ -1,5 +1,5 @@
 import { AxiosResByData } from '@customTypes/common';
-import { requiredJwtTokeninstance } from '@libs/axios/axios';
+import { userApiInstance } from '@libs/axios/axios';
 import { CreateTaskRequestDto } from '@services/swagger/output/data-contracts';
 import { AxiosResponse } from 'axios';
 
@@ -69,7 +69,7 @@ export const createTask = async (newTask: CreateTaskParams) => {
 
     // API 요청
     const createTaskResponse: AxiosResponse<AxiosResByData<any>> =
-      await requiredJwtTokeninstance.post('/user/api/task/v1', formData, {
+      await userApiInstance.post('/user/api/task/v1', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },

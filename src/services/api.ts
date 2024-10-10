@@ -1,6 +1,6 @@
 import { Cookies } from 'react-cookie';
 
-import { requiredJwtTokeninstance } from '@libs/axios/axios';
+import { userApiInstance } from '@libs/axios/axios';
 import axios, { AxiosError, AxiosResponse } from 'axios';
 import config from 'config/config';
 
@@ -100,7 +100,7 @@ export const loginAPI = async ({
 };
 
 export const getLoggedUserAPI = async () => {
-  const response = (await requiredJwtTokeninstance.get(
+  const response = (await userApiInstance.get(
     `${config.backendUrl}/user/api/info/v1`,
   )) as AxiosResponse<AxiosRes<GetUserInfoData>, any>;
   return { result: response.data.data, focus: '', errorMessage: '' };

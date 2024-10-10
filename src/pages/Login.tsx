@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 import passwordIcon from '@assets/lock-01.svg';
 import mail from '@assets/mail-01.svg';
@@ -142,6 +142,7 @@ export default function Login() {
     userId: '',
     password: '',
   });
+  const navigate = useNavigate();
 
   const validateLoginForm = () => {
     const passwordRegExp = /(?=.*[0-9])(?=.*[a-zA-Z])(?=.*\W)(?=\S+$).{8,16}/;
@@ -187,11 +188,10 @@ export default function Login() {
     try {
       const loginResponse = await loginAPI({ ...loginForm });
       if (loginResponse.result === 'OK') {
-
         localStorage.setItem('loggedUserId', loginForm.userId);
 
         window.alert('로그인 성공!');
-        window.location.href = '/';
+        navigate('/');
       }
     } catch (error) {
       if (error instanceof AxiosError && error.response) {

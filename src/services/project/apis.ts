@@ -1,6 +1,6 @@
 import { AxiosResByData } from '@customTypes/common';
 import { EditProjectParams, Project } from '@customTypes/project';
-import { requiredJwtTokeninstance } from '@libs/axios/axios';
+import { userApiInstance } from '@libs/axios/axios';
 import { CreateProjectRequestDto } from '@services/swagger/output/data-contracts';
 import { AxiosResponse } from 'axios';
 
@@ -13,9 +13,7 @@ export const getProjectIdList = async () => {
   const getProjectIdsRes: AxiosResponse<
     AxiosResByData<any>,
     any
-  > = await requiredJwtTokeninstance.get(
-    `/project/api/v2?userId=${loggedUserId}`,
-  );
+  > = await userApiInstance.get(`/project/api/v2?userId=${loggedUserId}`);
 
   const { userId } = getProjectIdsRes.data.data;
 
@@ -35,20 +33,19 @@ export const getProjectList = async () => {
   const loggedInUserId = localStorage.getItem('loggedUserId');
 
   const getProjectIdsRes: AxiosResponse<
-    AxiosResByData<{ userId: number[] }>,
+    AxiosResByData<{ projectIds: number[] }>,
     any
-  > = await requiredJwtTokeninstance.get(
-    `/project/api/v2?userId=${loggedInUserId}`,
+  > = await userApiInstance.get(`/project/api/v2?userId=${loggedInUserId}`);
+
+  const joinedProjectIds = getProjectIdsRes.data.data.projectIds.join(',');
+
+  const getProjectListResponse: AxiosResponse<
+    AxiosResByData<{ projectInfos: Project[] }>
+  > = await userApiInstance.get(
+    `node2/project/api/v1?projectIds=${joinedProjectIds}`,
   );
 
-  const joinedProjectIds = getProjectIdsRes.data.data.userId.join(',');
-
-  const getProjectListResponse: AxiosResponse<AxiosResByData<Project[]>> =
-    await requiredJwtTokeninstance.get(
-      `http://150.136.153.235:31585/project/api/v1?projectIds=${joinedProjectIds}`,
-    );
-
-  return getProjectListResponse.data.data;
+  return getProjectListResponse.data.data.projectInfos;
 };
 
 /**
@@ -70,9 +67,7 @@ export const getProjectList = async () => {
 
 export const getProject = async (projectId: number) => {
   const getProjectResponse: AxiosResponse<AxiosResByData<Project[]>> =
-    await requiredJwtTokeninstance.get(
-      `http://150.136.153.235:31585/project/api/v1?projectIds=${projectId}`,
-    );
+    await userApiInstance.get(`node2/project/api/v1?projectIds=${projectId}`);
 
   return getProjectResponse.data.data[0];
 };
@@ -93,8 +88,15 @@ export const getProject = async (projectId: number) => {
  */
 
 export const createProject = async (newProject: CreateProjectRequestDto) => {
-  await requiredJwtTokeninstance.post('/user/api/project', {
-    ...newProject,
+  const formData = new FormData();
+  const project = new Blob([JSON.stringify(newProject)], {
+    type: 'application/json',
+  });
+  formData.append('data', project);
+  await userApiInstance.post('/user/api/project', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
   });
 
   return newProject;
@@ -117,7 +119,7 @@ export const createProject = async (newProject: CreateProjectRequestDto) => {
  */
 
 export const editProject = async (project: EditProjectParams) => {
-  await requiredJwtTokeninstance.put('/user/api/project', {
+  await userApiInstance.put('/user/api/project', {
     ...project,
   });
 
@@ -134,7 +136,7 @@ export const editProject = async (project: EditProjectParams) => {
  */
 
 export const deleteProject = async (projectId: number) => {
-  await requiredJwtTokeninstance.delete('/user/api/project', {
+  await userApiInstance.delete('/user/api/project', {
     data: {
       projectId,
     },
